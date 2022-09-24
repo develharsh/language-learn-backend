@@ -1,21 +1,19 @@
 const learnerModel = require("../models/learner.model");
 const enrollmentModel = require("../models/enrollment.model");
-const { CourseIdsEnum } = require("../utils/hardcoded");
+const { isEmail, isPhone } = require("../utils/hardcoded");
+// const { CourseIdsEnum } = require("../utils/hardcoded");
 
 module.exports.register = async (req, res) => {
   try {
     if (!req.body.Name) throw { message: "Name is missing", code: 400 };
-    if (!req.body.Country) throw { message: "Country is missing", code: 400 };
-    if (!req.body.State) throw { message: "State is missing", code: 400 };
-    if (!req.body.City) throw { message: "City is missing", code: 400 };
     if (!req.body.Email) throw { message: "Email is missing", code: 400 };
+    if (!isEmail(req.body.Email))
+      throw { message: "Email is invalid", code: 400 };
     if (!req.body.CountryCode)
       throw { message: "Country Code is missing", code: 400 };
     if (!req.body.Phone) throw { message: "Phone is missing", code: 400 };
-    if (!req.body.EnrollingFor)
-      throw { message: "Enrolling For is missing", code: 400 };
-    if (!CourseIdsEnum.includes(req.body.EnrollingFor))
-      throw { message: "Enrolling For is invalid", code: 500 };
+    if (!isPhone(req.body.Phone))
+      throw { message: "Phone must be 10 Digit Long", code: 400 };
     let anyUser;
     anyUser = await learnerModel.findOne({ Email: req.body.Email });
     if (anyUser) throw { message: "Email Already Exists", code: 500 };
@@ -28,15 +26,13 @@ module.exports.register = async (req, res) => {
     req.body.Phone = `${req.body.CountryCode}${req.body.Phone}`;
 
     const user = await learnerModel.create(req.body);
-    const enrolled = await enrollmentModel.create({
+    enrollmentModel.create({
       LearnerId: user._id,
-      Course: req.body.EnrollingFor,
+      Course: "ENGLISH",
     });
     const sendEmail = require("../utils/sendEmail");
     sendEmail("event", {
-      message:
-        `New Learner Onboarded: ${user.Name}, ${user.Country}, ` +
-        `${user.State}, ${user.City}, ${user.Email}, ${user.Phone}, ${user._id}, ${enrolled.Course}`,
+      message: `New Learner Onboarded: ${user.Name}, ${user.Email}, ${user.Phone}, ${user._id}`,
       email: "harshvsingh.223@gmail.com,kjlsingh.223@gmail.com",
     });
     res.status(201).json({

@@ -4,16 +4,15 @@ const learnerSchema = new mongoose.Schema(
   {
     Name: {
       type: String,
-      required: true,
       trim: true,
     },
-    Country: { type: String, required: true, trim: true },
-    State: { type: String, required: true, trim: true },
-    City: { type: String, required: true, trim: true },
-    Email: { type: String, required: true, trim: true, unique: true },
-    Phone: { type: String, required: true, trim: true, unique: true }, //combined countrycode
-    CountryCode: { type: String, required: true, trim: true },
-    PartialPhone: { type: String, required: true, trim: true },
+    // Country: { type: String, default: "IN" },
+    // State: { type: String, required: true, trim: true },
+    // City: { type: String, required: true, trim: true },
+    Email: { type: String, trim: true, unique: true },
+    Phone: { type: String, trim: true, unique: true },
+    CountryCode: { type: String, trim: true },
+    PartialPhone: { type: String, trim: true },
   },
   { timestamps: true }
 );
